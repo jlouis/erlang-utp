@@ -16,10 +16,11 @@
 -record(sock_info, {
           %% Stuff pertaining to the socket:
           addr        :: string() | ip_address(),
-          opts        :: [{atom(), term()}], %% Options on the socket
-          port        :: port_number(),
-          socket      :: inet:socket(),
-          conn_id     :: integer(),
+          opts        :: proplists:proplist(), %% Options on the socket
+          packet_size :: integer(),
+          port        :: 0..16#FFFF,
+          socket      :: gen_udp:socket(),
+          conn_id     :: 'not_set' | integer(),
           timestamp_difference :: integer()
         }).
 -opaque t() :: #sock_info{}.
