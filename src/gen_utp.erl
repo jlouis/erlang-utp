@@ -228,6 +228,9 @@ handle_cast({incoming_syn, Packet, Addr, Port}, #state { listen_queue = Q,
         synq_full ->
             ?DEBUG([syn_queue_full]),
             {noreply, S}; % @todo RESET sent back?
+        duplicate ->
+            ?DEBUG([duplicate_syn_received]),
+            {noreply, S};
         {ok, Pairings, NewQ} ->
             ?DEBUG([{paired, Pairings},
                     {syn_q, NewQ}]),
@@ -281,8 +284,15 @@ push_syn(_SYNPacket, #accept_queue {
     synq_full;
 push_syn(SYNPacket, #accept_queue { incoming_conns = IC,
                                     q_len          = QLen } = Q) ->
-    handle_queue(Q#accept_queue { incoming_conns = queue:in(SYNPacket, IC),
-                                  q_len          = QLen + 1 }, []).
+    case queue:member(SYNPacket, IC) of
+        true ->
+            duplicate;
+        false ->
+            handle_queue(
+              Q#accept_queue {
+                incoming_conns = queue:in(SYNPacket, IC),
+                q_len          = QLen + 1 }, [])
+    end.
 
 
 handle_queue(#accept_queue { acceptors = AQ,
