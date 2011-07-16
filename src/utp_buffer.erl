@@ -1,5 +1,5 @@
 %% @doc Low level packet buffer management.
--module(utp_pkt).
+-module(utp_buffer).
 
 -include("log.hrl").
 -include("utp.hrl").
@@ -219,8 +219,10 @@ handle_receive_buffer(SeqNo, Payload, PacketBuffer, State) ->
         %% Force an ACK out in this case
         duplicate -> {PacketBuffer, [{send_ack, true}]};
         {ok, #pkt_buf{} = PB} -> {PB, consider_send_ack(PacketBuffer, PB)};
-        {got_fin, #pkt_buf{} = PB} -> {PB, [{got_fin, true},
-                                            {send_ack, true}]} % *Always* ACK the FIN packet!
+        {got_fin, #buffer{} = PB} ->
+            %% *Always* ACK the FIN packet!
+            {PB, [{got_fin, true},
+                  {send_ack, true}]}
     end.
 
 
