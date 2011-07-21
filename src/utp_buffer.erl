@@ -528,6 +528,7 @@ fill_window(Network, ProcQueue, PktBuf) ->
                  true ->
                      [no_piggyback];
                  false ->
+                     utp:report_event(90, us, sent_data, []),
                      [sent_data]
              end,
     {Result ++ MaxOut, NBuf1, NProcQueue}.
